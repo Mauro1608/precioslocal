@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PreciosLocal - App de Supermercados</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .phone-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 840px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 40px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: #f8fafc;
+            border: 10px solid #1e293b;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen p-4 font-sans">
+
+    <!-- CONTENEDOR TIPO CELULAR -->
+    <div class="phone-frame">
+        
+        <!-- BARRA SUPERIOR MÓVIL (STATUS BAR) -->
+        <div class="bg-slate-900 text-white px-6 py-3 flex justify-between items-center text-xs select-none z-50">
+            <span class="font-semibold">10:30</span>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full text-emerald-400"></i>
+            </div>
+        </div>
+
+        <!-- CONTENEDOR DE PANTALLAS (VISTAS) -->
+        <main class="flex-1 overflow-y-auto no-scrollbar relative pb-24">
+
+            <!-- ================= PANTALLA 0: LOGIN / INGRESO ================= -->
+            <div id="view-login" class="p-6 flex flex-col justify-between h-full bg-emerald-600 text-white min-h-[750px]">
+                <div class="pt-10 text-center space-y-4">
+                    <div class="w-20 h-20 bg-white text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-lg">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                    </div>
+                    <h1 class="text-2xl font-black tracking-wide">PreciosLocal</h1>
+                    <p class="text-xs text-emerald-100 px-4">Compará precios y ahorrá en Maures, Ciciliani y SuperDos.</p>
+                </div>
+
+                <div class="bg-white text-slate-800 p-6 rounded-3xl shadow-xl space-y-4">
+                    <h2 class="text-sm font-bold text-slate-800 text-center">¡Bienvenido! Ingresá tus datos</h2>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Tu Nombre</label>
+                            <input type="text" id="user-name-input" placeholder="Ej. Juan Pérez" 
+                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Correo Electrónico</label>
+                            <input type="email" id="user-email-input" placeholder="tu@correo.com" 
+                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+
+                    <button onclick="handleLogin()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition">
+                        Ingresar a la App
+                    </button>
+                    <button onclick="skipLogin()" class="w-full py-1 text-slate-400 hover:text-slate-600 text-[10px] font-semibold">
+                        Continuar como invitado
+                    </button>
+                </div>
+            </div>
+
+            <!-- HEADER INTERNO -->
+            <header id="app-header" class="bg-emerald-600 text-white px-6 py-4 shadow-md z-40 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-xl font-black tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-basket-shopping"></i> PreciosLocal
+                        </h1>
+                        <p id="welcome-user-text" class="text-xs text-emerald-100">Hola, Usuario</p>
+                    </div>
+                    <button onclick="logout()" class="bg-emerald-700 p-2 rounded-full text-xs font-bold px-3 shadow-inner hover:bg-emerald-800 transition">
+                        <i class="fa-solid fa-right-from-bracket"></i> Salir
+                    </button>
+                </div>
+            </header>
+
+            <!-- ================= PANTALLA 1: INICIO (HOME) ================= -->
+            <div id="view-home" class="p-4 space-y-4 hidden">
+                <div class="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-5 rounded-3xl shadow-md space-y-2">
+                    <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-600/60 px-2 py-0.5 rounded-full">Red de Comercios</span>
+                    <h2 class="text-lg font-black">¡Ahorrá en cada compra!</h2>
+                    <p class="text-xs text-emerald-100">Explorá los catálogos de los súper locales o aprovechá los combos destacados de la semana.</p>
+                    <button onclick="switchTab('search')" class="mt-2 bg-white text-emerald-800 text-xs font-bold px-4 py-2 rounded-xl shadow hover:bg-emerald-50 transition">
+                        Ir al Buscador de Precios <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">Combos y Banners Destacados</h3>
+                    <span class="text-[10px] text-emerald-600 font-bold">Patrocinado ($15 USD)</span>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-4 rounded-2xl shadow-md space-y-2 border border-emerald-600">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] bg-emerald-900 text-emerald-100 px-2.5 py-0.5 rounded-full font-bold">Maures</span>
+                            <span class="text-[10px] bg-white text-emerald-900 px-2 py-0.5 rounded font-black">OFERTA IMPERDIBLE</span>
+                        </div>
+                        <h4 class="text-xs font-black flex items-center gap-1.5">
+                            <i class="fa-solid fa-wine-bottle"></i> Combo Fernet Branca 750ml + Coca-Cola 2.25L
+                        </h4>
+                        <p class="text-xs text-emerald-100">El combo perfecto para el fin de semana al mejor precio de la zona.</p>
+                        <div class="pt-2 flex justify-between items-center border-t border-emerald-600/50">
+                            <span class="text-[10px] text-emerald-200">Precio especial efectivo/débito</span>
+                            <span class="text-sm font-black text-white">$8.450</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-4 rounded-2xl shadow-md space-y-2 border border-blue-600">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] bg-blue-900 text-blue-100 px-2.5 py-0.5 rounded-full font-bold">Ciciliani</span>
+                            <span class="text-[10px] bg-white text-blue-900 px-2 py-0.5 rounded font-black">COMBO DESAYUNO</span>
+                        </div>
+                        <h4 class="text-xs font-black flex items-center gap-1.5">
+                            <i class="fa-solid fa-mug-hot"></i> Yerba Playadito 1kg + Galletitas 3 Marías
+                        </h4>
+                        <p class="text-xs text-blue-100">Ideal para stockear la alacena con productos de primera marca.</p>
+                        <div class="pt-2 flex justify-between items-center border-t border-blue-600/50">
+                            <span class="text-[10px] text-blue-200">Precio especial contado</span>
+                            <span class="text-sm font-black text-white">$4.850</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-amber-700 to-orange-800 text-white p-4 rounded-2xl shadow-md space-y-2 border border-amber-600">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] bg-amber-900 text-amber-100 px-2.5 py-0.5 rounded-full font-bold">SuperDos</span>
+                            <span class="text-[10px] bg-white text-amber-900 px-2 py-0.5 rounded font-black">PACK AHORRO</span>
+                        </div>
+                        <h4 class="text-xs font-black flex items-center gap-1.5">
+                            <i class="fa-solid fa-soap"></i> Lavandina 2L + Detergente Magistral 500ml
+                        </h4>
+                        <p class="text-xs text-amber-100">Lleva el kit indispensable de limpieza con un descuento directo.</p>
+                        <div class="pt-2 flex justify-between items-center border-t border-amber-600/50">
+                            <span class="text-[10px] text-amber-200">Precio especial todos los días</span>
+                            <span class="text-sm font-black text-white">$3.200</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PANTALLA 2: BUSCAR ================= -->
+            <div id="view-search" class="p-4 space-y-4 hidden">
+                <div class="bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl flex items-center justify-between text-[10px] text-emerald-800">
+                    <span class="flex items-center gap-1.5 font-semibold"><i class="fa-solid fa-circle-check text-emerald-600"></i> Precios validados por los comercios</span>
+                    <span class="text-slate-500 font-bold">Actualizado: 22-09-2026</span>
+                </div>
+
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="search-input" oninput="filterProducts()" placeholder="Buscá leche, yerba, fideos..." 
+                        class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+                </div>
+
+                <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                    <button onclick="filterCategory('todos')" class="cat-btn px-4 py-1.5 bg-emerald-600 text-white rounded-full text-xs font-semibold whitespace-nowrap shadow-sm">Todos</button>
+                    <button onclick="filterCategory('favoritos')" class="cat-btn px-4 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-full text-xs font-semibold whitespace-nowrap flex items-center gap-1"><i class="fa-solid fa-star text-amber-400"></i> Favoritos</button>
+                    <button onclick="filterCategory('Almacén')" class="cat-btn px-4 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-full text-xs font-semibold whitespace-nowrap">Almacén</button>
+                    <button onclick="filterCategory('Lácteos')" class="cat-btn px-4 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-full text-xs font-semibold whitespace-nowrap">Lácteos</button>
+                    <button onclick="filterCategory('Bebidas')" class="cat-btn px-4 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-full text-xs font-semibold whitespace-nowrap">Bebidas</button>
+                    <button onclick="filterCategory('Limpieza')" class="cat-btn px-4 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-full text-xs font-semibold whitespace-nowrap">Limpieza</button>
+                </div>
+
+                <div id="products-list" class="space-y-3"></div>
+            </div>
+
+            <!-- ================= PANTALLA 3: CHANGUITO ================= -->
+            <div id="view-cart" class="p-4 space-y-4 hidden">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-shopping-cart text-emerald-600"></i> Tu Changuito Agrupado
+                        </h2>
+                        <p class="text-xs text-slate-500">Organizado por supermercado con totales individuales</p>
+                    </div>
+                    <button onclick="clearCart()" id="btn-clear-cart" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-xl text-xs font-bold transition hidden flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Vaciar
+                    </button>
+                </div>
+
+                <div id="cart-items-container" class="space-y-4"></div>
+                <div id="cart-summary-section" class="space-y-3 pt-2"></div>
+            </div>
+
+            <!-- ================= PANTALLA 4: DESCUENTOS ================= -->
+            <div id="view-promos" class="p-4 space-y-4 hidden">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-percent text-emerald-600"></i> Descuentos y Días de Bancos
+                    </h2>
+                    <p class="text-xs text-slate-500">Beneficios con tarjetas, Cuenta DNI y entidades financieras</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2 border-l-4 border-l-emerald-600">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Maures</span>
+                            <span class="text-[10px] text-slate-400 font-semibold">Miércoles de Lácteos</span>
+                        </div>
+                        <h3 class="text-xs font-black text-slate-800">20% de Reintegro con Cuenta DNI</h3>
+                        <p class="text-xs text-slate-500">Válido en la sección de fiambrería y lácteos todos los miércoles del mes.</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2 border-l-4 border-l-blue-600">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Ciciliani</span>
+                            <span class="text-[10px] text-slate-400 font-semibold">Fin de Semana</span>
+                        </div>
+                        <h3 class="text-xs font-black text-slate-800">3 Cuotas sin interés con Tarjetas Bancarias</h3>
+                        <p class="text-xs text-slate-500">En compras superiores a $30.000 en almacén y bebidas.</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2 border-l-4 border-l-amber-600">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">SuperDos</span>
+                            <span class="text-[10px] text-slate-400 font-semibold">Jueves de Descuento</span>
+                        </div>
+                        <h3 class="text-xs font-black text-slate-800">15% de Ahorro con Tarjeta de Débito Local</h3>
+                        <p class="text-xs text-slate-500">Aplicado directamente en línea de caja sin tope de devolución.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PANTALLA 5: HISTORIAL (CON BOTÓN DE BORRAR LISTA) ================= -->
+            <div id="view-history" class="p-4 space-y-4 hidden">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i> Mis Listas Guardadas
+                    </h2>
+                    <p class="text-xs text-slate-500">Historial de changuitos con detalle de productos, comercios y opción de eliminar</p>
+                </div>
+
+                <div id="saved-lists-container" class="space-y-3"></div>
+            </div>
+
+            <!-- ================= PANTALLA 6: SUCURSALES ================= -->
+            <div id="view-info" class="p-4 space-y-4 hidden">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-store text-emerald-600"></i> Sucursales y Pagos
+                    </h2>
+                    <p class="text-xs text-slate-500">Información útil de los 3 supermercados locales</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-800">Maures</h3>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Zona Norte</span>
+                        </div>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-emerald-600"></i> Av. San Martín 450</p>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5"><i class="fa-solid fa-clock text-emerald-600"></i> Lun a Sáb: 8:00 a 21:00 hs</p>
+                        <div class="pt-1 flex gap-1.5 flex-wrap">
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Efectivo</span>
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Mercado Pago</span>
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Débito/Crédito</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-800">Ciciliani</h3>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Centro</span>
+                        </div>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-emerald-600"></i> Bv. 9 de Julio 1200</p>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5"><i class="fa-solid fa-clock text-emerald-600"></i> Lun a Sáb: 8:30 a 20:30 hs</p>
+                        <div class="pt-1 flex gap-1.5 flex-wrap">
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Efectivo</span>
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Cuenta DNI</span>
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Tarjetas bancarias</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-800">SuperDos</h3>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Zona Sur</span>
+                        </div>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-emerald-600"></i> Calle Mitre 310</p>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5"><i class="fa-solid fa-clock text-emerald-600"></i> Lun a Dom: 8:00 a 22:00 hs</p>
+                        <div class="pt-1 flex gap-1.5 flex-wrap">
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Efectivo</span>
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">QR / Billeteras</span>
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Todas las tarjetas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+        <nav id="bottom-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-2 flex justify-around items-center z-50 hidden">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-emerald-600 transition">
+                <i class="fa-solid fa-house text-base"></i>
+                <span class="text-[9px] font-bold mt-1">Inicio</span>
+            </button>
+            <button onclick="switchTab('search')" id="nav-search" class="flex flex-col items-center text-slate-400 transition">
+                <i class="fa-solid fa-magnifying-glass text-base"></i>
+                <span class="text-[9px] font-medium mt-1">Buscar</span>
+            </button>
+            <button onclick="switchTab('cart')" id="nav-cart" class="flex flex-col items-center text-slate-400 transition relative">
+                <i class="fa-solid fa-cart-shopping text-base"></i>
+                <span class="text-[9px] font-medium mt-1">Changuito</span>
+                <span id="cart-badge" class="absolute -top-1 -right-2 bg-rose-500 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+            <button onclick="switchTab('promos')" id="nav-promos" class="flex flex-col items-center text-slate-400 transition">
+                <i class="fa-solid fa-percent text-base"></i>
+                <span class="text-[9px] font-medium mt-1">Descuentos</span>
+            </button>
+            <button onclick="switchTab('history')" id="nav-history" class="flex flex-col items-center text-slate-400 transition">
+                <i class="fa-solid fa-clock-rotate-left text-base"></i>
+                <span class="text-[9px] font-medium mt-1">Historial</span>
+            </button>
+            <button onclick="switchTab('info')" id="nav-info" class="flex flex-col items-center text-slate-400 transition">
+                <i class="fa-solid fa-store text-base"></i>
+                <span class="text-[9px] font-medium mt-1">Sucursales</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- SCRIPT DE LÓGICA DE LA APP -->
+    <script>
+        const products = [
+            { 
+                id: 1, name: "Leche Entera 1L", category: "Lácteos", isFavorite: true,
+                brands: {
+                    "La Serenísima": {
+                        Maures: { price: 1250, oldPrice: 1250 },
+                        Ciciliani: { price: 1300, oldPrice: 1280 },
+                        SuperDos: { price: 1190, oldPrice: 1220 }
+                    },
+                    "Sancor": {
+                        Maures: { price: 1180, oldPrice: 1150 },
+                        Ciciliani: { price: 1220, oldPrice: 1200 },
+                        SuperDos: { price: 1150, oldPrice: 1180 }
+                    }
+                }
+            },
+            { 
+                id: 2, name: "Yerba Mate 1kg", category: "Almacén", isFavorite: true,
+                brands: {
+                    "Playadito": {
+                        Maures: { price: 3850, oldPrice: 3800 },
+                        Ciciliani: { price: 3700, oldPrice: 3800 },
+                        SuperDos: { price: 3950, oldPrice: 3900 }
+                    },
+                    "Amanda": {
+                        Maures: { price: 3400, oldPrice: 3300 },
+                        Ciciliani: { price: 3450, oldPrice: 3450 },
+                        SuperDos: { price: 3350, oldPrice: 3400 }
+                    }
+                }
+            },
+            { 
+                id: 3, name: "Fideos Tirabuzón 500g", category: "Almacén", isFavorite: false,
+                brands: {
+                    "Matarazzo": {
+                        Maures: { price: 920, oldPrice: 950 },
+                        Ciciliani: { price: 890, oldPrice: 900 },
+                        SuperDos: { price: 950, oldPrice: 930 }
+                    }
+                }
+            },
+            { 
+                id: 4, name: "Aceite Girasol 1.5L", category: "Almacén", isFavorite: false,
+                brands: {
+                    "Natura": {
+                        Maures: { price: 2450, oldPrice: 2550 },
+                        Ciciliani: { price: 2590, oldPrice: 2550 },
+                        SuperDos: { price: 2390, oldPrice: 2450 }
+                    }
+                }
+            },
+            { 
+                id: 5, name: "Queso Crema 400g", category: "Lácteos", isFavorite: false,
+                brands: {
+                    "Casancrem": {
+                        Maures: { price: 2100, oldPrice: 2100 },
+                        Ciciliani: { price: 1980, oldPrice: 2050 },
+                        SuperDos: { price: 2150, oldPrice: 2120 }
+                    }
+                }
+            },
+            { 
+                id: 6, name: "Gaseosa Cola 2.25L", category: "Bebidas", isFavorite: true,
+                brands: {
+                    "Coca-Cola": {
+                        Maures: { price: 2800, oldPrice: 2700 },
+                        Ciciliani: { price: 2750, oldPrice: 2750 },
+                        SuperDos: { price: 2900, oldPrice: 2800 }
+                    }
+                }
+            }
+        ];
+
+        let cart = {};
+        let savedLists = [
+            {
+                id: 1,
+                date: "14-09-2026",
+                title: "Compra Semana Pasada",
+                total: 7550,
+                items: [
+                    { name: "Leche Entera 1L (La Serenísima)", superName: "SuperDos", price: 1190 },
+                    { name: "Yerba Mate 1kg (Playadito)", superName: "Ciciliani", price: 3700 },
+                    { name: "Gaseosa Cola 2.25L (Coca-Cola)", superName: "Maures", price: 2800 }
+                ]
+            }
+        ];
+        let currentCategory = 'todos';
+        let selectedBrands = {};
+        let userName = '';
+
+        window.onload = function() {
+            products.forEach(p => {
+                selectedBrands[p.id] = Object.keys(p.brands)[0];
+            });
+            renderProducts(products);
+            updateCartBadge();
+        };
+
+        function handleLogin() {
+            const nameInput = document.getElementById('user-name-input').value.trim();
+            userName = nameInput !== '' ? nameInput : 'Vecino';
+            startAppSession();
+        }
+
+        function skipLogin() {
+            userName = 'Invitado';
+            startAppSession();
+        }
+
+        function startAppSession() {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('app-header').classList.remove('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('welcome-user-text').textContent = `Hola, ${userName}`;
+            switchTab('home');
+        }
+
+        function logout() {
+            document.getElementById('app-header').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.add('hidden');
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-search').classList.add('hidden');
+            document.getElementById('view-cart').classList.add('hidden');
+            document.getElementById('view-history').classList.add('hidden');
+            document.getElementById('view-promos').classList.add('hidden');
+            document.getElementById('view-info').classList.add('hidden');
+            document.getElementById('view-login').classList.remove('hidden');
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-search').classList.add('hidden');
+            document.getElementById('view-cart').classList.add('hidden');
+            document.getElementById('view-history').classList.add('hidden');
+            document.getElementById('view-promos').classList.add('hidden');
+            document.getElementById('view-info').classList.add('hidden');
+
+            document.getElementById('nav-home').className = "flex flex-col items-center text-slate-400 transition";
+            document.getElementById('nav-search').className = "flex flex-col items-center text-slate-400 transition";
+            document.getElementById('nav-cart').className = "flex flex-col items-center text-slate-400 transition relative";
+            document.getElementById('nav-promos').className = "flex flex-col items-center text-slate-400 transition";
+            document.getElementById('nav-history').className = "flex flex-col items-center text-slate-400 transition";
+            document.getElementById('nav-info').className = "flex flex-col items-center text-slate-400 transition";
+
+            if (tabName === 'home') {
+                document.getElementById('view-home').classList.remove('hidden');
+                document.getElementById('nav-home').className = "flex flex-col items-center text-emerald-600 transition";
+            } else if (tabName === 'search') {
+                document.getElementById('view-search').classList.remove('hidden');
+                document.getElementById('nav-search').className = "flex flex-col items-center text-emerald-600 transition";
+            } else if (tabName === 'cart') {
+                document.getElementById('view-cart').classList.remove('hidden');
+                document.getElementById('nav-cart').className = "flex flex-col items-center text-emerald-600 transition relative";
+                renderCart();
+            } else if (tabName === 'promos') {
+                document.getElementById('view-promos').classList.remove('hidden');
+                document.getElementById('nav-promos').className = "flex flex-col items-center text-emerald-600 transition";
+            } else if (tabName === 'history') {
+                document.getElementById('view-history').classList.remove('hidden');
+                document.getElementById('nav-history').className = "flex flex-col items-center text-emerald-600 transition";
+                renderHistory();
+            } else if (tabName === 'info') {
+                document.getElementById('view-info').classList.remove('hidden');
+                document.getElementById('nav-info').className = "flex flex-col items-center text-emerald-600 transition";
+            }
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+            const buttons = document.querySelectorAll('.cat-btn');
+            buttons.forEach(btn => {
+                const btnText = btn.textContent.trim().toLowerCase();
+                const targetText = category === 'todos' ? 'todos' : category.toLowerCase();
+                if(btnText.includes(targetText)) {
+                    btn.className = "cat-btn px-4 py-1.5 bg-emerald-600 text-white rounded-full text-xs font-semibold whitespace-nowrap shadow-sm";
+                } else {
+                    btn.className = "cat-btn px-4 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-full text-xs font-semibold whitespace-nowrap";
+                }
+            });
+            filterProducts();
+        }
+
+        function filterProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = products.filter(p => {
+                const matchesName = p.name.toLowerCase().includes(query);
+                const matchesBrand = Object.keys(p.brands).some(b => b.toLowerCase().includes(query));
+                
+                let matchesCat = true;
+                if (currentCategory === 'favoritos') {
+                    matchesCat = p.isFavorite;
+                } else if (currentCategory !== 'todos') {
+                    matchesCat = p.category === currentCategory;
+                }
+
+                return (matchesName || matchesBrand) && matchesCat;
+            });
+            renderProducts(filtered);
+        }
+
+        function toggleFavorite(productId) {
+            const prod = products.find(p => p.id === productId);
+            if(prod) {
+                prod.isFavorite = !prod.isFavorite;
+                filterProducts();
+            }
+        }
+
+        function changeBrand(productId, brandName) {
+            selectedBrands[productId] = brandName;
+            filterProducts();
+        }
+
+        function renderProducts(listToRender) {
+            const container = document.getElementById('products-list');
+            if(listToRender.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs">No se encontraron productos</div>`;
+                return;
+            }
+
+            container.innerHTML = listToRender.map(p => {
+                const currentBrand = selectedBrands[p.id] || Object.keys(p.brands)[0];
+                const brandPrices = p.brands[currentBrand];
+
+                const supers = ['Maures', 'Ciciliani', 'SuperDos'];
+                let cheapestSuper = supers[0];
+                supers.forEach(s => {
+                    if(brandPrices[s].price < brandPrices[cheapestSuper].price) cheapestSuper = s;
+                });
+
+                const brandKeys = Object.keys(p.brands);
+
+                return `
+                    <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-bold text-slate-400 text-xs">
+                                    <i class="fa-solid fa-box-open text-emerald-500"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">${p.category}</span>
+                                    <h3 class="text-xs font-bold text-slate-800 mt-0.5">${p.name}</h3>
+                                </div>
+                            </div>
+                            <button onclick="toggleFavorite(${p.id})" class="text-sm p-1 transition ${p.isFavorite ? 'text-amber-400 scale-110' : 'text-slate-300 hover:text-amber-400'}">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                        </div>
+
+                        ${brandKeys.length > 1 ? `
+                            <div class="flex gap-1.5 pt-1">
+                                ${brandKeys.map(b => `
+                                    <button onclick="changeBrand(${p.id}, '${b}')" class="px-3 py-1 rounded-lg text-[10px] font-bold ${b === currentBrand ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                                        ${b}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="text-[10px] text-emerald-700 font-bold px-1">
+                                Marca: ${currentBrand}
+                            </div>
+                        `}
+
+                        <div class="grid grid-cols-3 gap-2 pt-1">
+                            ${supers.map(s => {
+                                const info = brandPrices[s];
+                                const isCheapest = s === cheapestSuper;
+                                const cartKey = `${p.id}_${currentBrand}`;
+                                const isSelectedInCart = cart[cartKey] && cart[cartKey].selectedSuper === s;
+                                
+                                let diffText = "";
+                                if(info.price < info.oldPrice) {
+                                    diffText = `<span class="text-[9px] text-rose-600 font-semibold block">Antes: $${info.oldPrice.toLocaleString()}</span>`;
+                                } else if(info.price > info.oldPrice) {
+                                    diffText = `<span class="text-[9px] text-emerald-700 font-semibold block">Antes: $${info.oldPrice.toLocaleString()}</span>`;
+                                } else {
+                                    diffText = `<span class="text-[9px] text-slate-400 font-semibold block">Mismo precio</span>`;
+                                }
+
+                                return `
+                                    <div class="p-2 rounded-xl border ${isCheapest ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-100 bg-slate-50'} flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-[10px] font-bold text-slate-700">${s}</span>
+                                                ${isCheapest ? '<span class="text-[9px] bg-emerald-600 text-white px-1 rounded font-bold">Mejor</span>' : ''}                                             </div>                                             <span class="text-xs font-black text-slate-900 block mt-1">$${info.price.toLocaleString()}</span>
+                                            <div class="mt-1">${diffText}</div>
+                                        </div>
+                                        <button onclick="addToCart(${p.id}, '${currentBrand}', '${s}')" 
+                                            class="mt-2 w-full py-1 text-[10px] font-bold rounded-lg ${isSelectedInCart ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-700 hover:bg-emerald-600 hover:text-white'} transition">
+                                            ${isSelectedInCart ? 'Agregado' : 'Elegir'}
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addToCart(productId, brandName, supermarket) {
+            const product = products.find(p => p.id === productId);
+            const cartKey = `${productId}_${brandName}`;
+            cart[cartKey] = {
+                product: product,
+                brand: brandName,
+                selectedSuper: supermarket,
+                price: product.brands[brandName][supermarket].price
+            };
+            updateCartBadge();
+            filterProducts();
+        }
+
+        function removeFromCart(cartKey) {
+            delete cart[cartKey];
+            updateCartBadge();
+            renderCart();
+            filterProducts();
+        }
+
+        function clearCart() {
+            cart = {};
+            updateCartBadge();
+            renderCart();
+            filterProducts();
+        }
+
+        function saveCurrentList() {
+            const cartKeys = Object.keys(cart);
+            if(cartKeys.length === 0) return;
+
+            let totalMix = cartKeys.reduce((acc, k) => acc + cart[k].price, 0);
+            let itemsArray = cartKeys.map(k => {
+                return {
+                    name: `${cart[k].product.name} (${cart[k].brand})`,
+                    superName: cart[k].selectedSuper,
+                    price: cart[k].price
+                };
+            });
+
+            const newList = {
+                id: Date.now(),
+                date: "22-09-2026",
+                title: `Lista de Compras (${cartKeys.length} ítems)`,
+                total: totalMix,
+                items: itemsArray
+            };
+
+            savedLists.unshift(newList);
+            alert("¡Lista guardada con éxito en tu historial!");
+            switchTab('history');
+        }
+
+        function deleteSavedList(listId) {
+            savedLists = savedLists.filter(l => l.id !== listId);
+            renderHistory();
+        }
+
+        function updateCartBadge() {
+            const count = Object.keys(cart).length;
+            const badge = document.getElementById('cart-badge');
+            const btnClear = document.getElementById('btn-clear-cart');
+            if(count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+                btnClear.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                btnClear.classList.add('hidden');
+            }
+        }
+
+        function sendCartWhatsApp() {
+            const cartKeys = Object.keys(cart);
+            if(cartKeys.length === 0) return;
+
+            const supers = ['Maures', 'Ciciliani', 'SuperDos'];
+            let message = `🛒 *Mi Lista de Compras - PreciosLocal*%0A%0A`;
+            
+            supers.forEach(s => {
+                const itemsInSuper = cartKeys.map(k => cart[k]).filter(i => i.selectedSuper === s);
+                if(itemsInSuper.length > 0) {
+                    message += `🏪 *Supermercado ${s}:*%0A`;
+                    let subtotal = 0;
+                    itemsInSuper.forEach(item => {
+                        message += `- ${item.product.name} (${item.brand}): $${item.price.toLocaleString()}%0A`;
+                        subtotal += item.price;
+                    });
+                    message += `_Subtotal ${s}: $${subtotal.toLocaleString()}_%0A%0A`;
+                }
+            });
+
+            let totalMix = cartKeys.reduce((acc, k) => acc + cart[k].price, 0);
+            message += `💰 *Total General Estimado: $${totalMix.toLocaleString()}*%0A`;
+            message += `Generado desde la app PreciosLocal 📱`;
+
+            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const summaryContainer = document.getElementById('cart-summary-section');
+            const cartKeys = Object.keys(cart);
+
+            if(cartKeys.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-2xl border border-slate-100 p-6 space-y-3">
+                        <i class="fa-solid fa-basket-shopping text-4xl text-slate-300"></i>
+                        <p class="text-xs text-slate-500 font-medium">Tu changuito está vacío. Buscá productos y elegí en qué súper comprarlos.</p>
+                    </div>
+                `;
+                summaryContainer.innerHTML = '';
+                return;
+            }
+
+            const supers = ['Maures', 'Ciciliani', 'SuperDos'];
+            let groupedBySuper = {};
+            supers.forEach(s => groupedBySuper[s] = []);
+
+            cartKeys.forEach(key => {
+                const item = cart[key];
+                groupedBySuper[item.selectedSuper].push({ key, ...item });
+            });
+
+            let htmlGroups = '';
+            supers.forEach(s => {
+                const itemsInSuper = groupedBySuper[s];
+                if(itemsInSuper.length > 0) {
+                    let subtotalSuper = itemsInSuper.reduce((acc, curr) => acc + curr.price, 0);
+
+                    htmlGroups += `
+                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                            <div class="bg-slate-100 px-4 py-2.5 border-b border-slate-200 flex justify-between items-center">
+                                <span class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-store text-emerald-600"></i> ${s}
+                                </span>
+                                <span class="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
+                                    Total Súper: $${subtotalSuper.toLocaleString()}
+                                </span>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                ${itemsInSuper.map(item => `
+                                    <div class="p-3 flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center font-bold text-xs">
+                                                <i class="fa-solid fa-check"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-xs font-bold text-slate-800">${item.product.name} <span class="text-emerald-600 font-medium">(${item.brand})</span></h4>
+                                                <span class="text-[10px] text-slate-400">$${item.price.toLocaleString()} c/u</span>                                             </div>                                         </div>                                         <div class="flex items-center gap-3">                                             <span class="text-xs font-black text-slate-900">$${item.price.toLocaleString()}</span>
+                                            <button onclick="removeFromCart('${item.key}')" class="text-slate-400 hover:text-rose-500 text-xs">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = htmlGroups;
+
+            let totalMix = 0;
+            cartKeys.forEach(key => {
+                totalMix += cart[key].price;
+            });
+
+            let totalsSingle = { Maures: 0, Ciciliani: 0, SuperDos: 0 };
+            cartKeys.forEach(key => {
+                const item = cart[key];
+                supers.forEach(s => {
+                    totalsSingle[s] += item.product.brands[item.brand][s].price;
+                });
+            });
+
+            let bestSingleSuper = supers[0];
+            supers.forEach(s => {
+                if(totalsSingle[s] < totalsSingle[bestSingleSuper]) bestSingleSuper = s;
+            });
+
+            summaryContainer.innerHTML = `
+                <div class="bg-emerald-600 text-white p-4 rounded-2xl shadow-md space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-200">Total con tu Selección Mix</span>
+                        <span class="text-[10px] bg-emerald-700 px-2 py-0.5 rounded-full font-semibold">Ruta optimizada</span>
+                    </div>
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-2xl font-black">$${totalMix.toLocaleString()}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="saveCurrentList()" class="py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-bookmark text-emerald-600"></i> Guardar Lista
+                        </button>
+                        <button onclick="sendCartWhatsApp()" class="py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-1.5">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 space-y-3 shadow-sm">
+                    <span class="text-xs font-bold text-slate-800 block">Comprar todo en un solo súper:</span>
+                    <div class="space-y-2">
+                        ${supers.map(s => {
+                            const isBest = s === bestSingleSuper;
+                            return `
+                                <div class="flex justify-between items-center p-2 rounded-xl ${isBest ? 'bg-emerald-50 border border-emerald-300' : 'bg-slate-50 border border-slate-100'}">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-700">${s}</span>
+                                        ${isBest ? '<span class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">Más barato entero</span>' : ''}                                     </div>                                     <span class="text-xs font-black text-slate-900">$${totalsSingle[s].toLocaleString()}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('saved-lists-container');
+            if(savedLists.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-2xl border border-slate-100 p-6 space-y-3">
+                        <i class="fa-solid fa-clock-rotate-left text-4xl text-slate-300"></i>
+                        <p class="text-xs text-slate-500 font-medium">No tenés listas guardadas todavía. Armá tu changuito y guardalo para consultarlo después.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = savedLists.map(list => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <div>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">${list.date}</span>
+                            <h3 class="text-xs font-black text-slate-800 mt-1">${list.title}</h3>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-black text-emerald-700">$${list.total.toLocaleString()}</span>
+                            <button onclick="deleteSavedList(${list.id})" class="text-slate-300 hover:text-rose-500 text-xs p-1 transition" title="Borrar lista">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Productos y Comercios:</span>
+                        ${list.items.map(item => `
+                            <div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <span class="text-slate-700 font-medium"><i class="fa-solid fa-check text-emerald-600 mr-1.5"></i> ${item.name}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-bold">${item.superName}</span>                                     <span class="font-bold text-slate-900">$${item.price.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
